@@ -6,6 +6,10 @@
 // ------------ safety settings ----------------------
 #define CONTROL_UPDATE_TIMEOUT_MS 3000
 
+// ------------ Bound Controller ---------------------
+// If you don't have the MAC address of your controller, it's easy to find with a ble scanner app
+#define XBOX_MAC_ADDRESS {0x68, 0x6C, 0xE6, 0xA2, 0x05, 0x1F}
+
 // ------------ Spin control settings ----------------
 #define ACCELEROMETER_HARDWARE_RADIUS_CM 5.13f
 // Ant-tato distance: 3.415f
@@ -33,6 +37,12 @@
 #define PID_KI 0.4                                  // Integral - damping on the rebound curves. Lower values = slower to respond, but less bounces
 #define PID_KD 0.0                                  // Derivative - useful to prevent overshoot of target value.
 
+// ------------ RPM Targets ---------------------------
+#define CONTROL_TARGET_RPMS {600, 800, 1000, 1200, 1500, 1800, 2100, 2500, 3000};
+#define CONTROL_TRANSLATION_TRIMS {1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2, 10.0};
+#define NUM_TARGET_RPMS 9
+#define NUM_TRANS_TRIMS 13
+
 // ------------- controller button mappings ----------
 #define XBOX_DPAD_UP 0x01
 #define XBOX_DPAD_RIGHT 0x04
@@ -53,6 +63,7 @@
 #define I2C_SDA_PIN 8
 #define I2C_SCL_PIN 9
 #define BATTERY_ADC_PIN 10
+
 
 // ------------ Battery Configuration ---------------
 

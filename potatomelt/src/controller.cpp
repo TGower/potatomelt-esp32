@@ -5,16 +5,15 @@
 #include "melty_config.h"
 #include "subsystems/storage.h"
 
-ControllerPtr myControllers[BP32_MAX_GAMEPADS];
+ControllerPtr boundGamepad;
+
+const uint8_t allowedMAC[6] = XBOX_MAC_ADDRESS;
 
 // todo - save the trims & spin speed
-// todo - work out how to get these into melty_config.h properly
-int spin_target_rpms[] =  {600, 800, 1000, 1200, 1500, 1800, 2100, 2500, 3000};
-float translation_trims[] = {1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2, 10.0};
-#define NUM_TARGET_RPMS 9
-int target_rpm_index = 3;
+int spin_target_rpms[] = CONTROL_TARGET_RPMS;
+float translation_trims[] = CONTROL_TRANSLATION_TRIMS;
 
-#define NUM_TRANS_TRIMS 13;
+int target_rpm_index = 3;
 int target_trans_trim = 4;
 
 bool reverse_spin = false;
@@ -35,14 +34,9 @@ bool prev_ctrls_are_green = true;
 ctrl_state* ctrl_update(bool upd8) {
     long now = millis();
 
-    if (upd8) {
-        for (auto myController : myControllers) {
-            if (myController && myController->isConnected() && myController->hasData()) {
-                // create a new control state
-                last_updated_millis = now;
-                return get_state(myController);
-            }
-        }
+    if (upd8 && boundGamepad && boundGamepad->isConnected() && boundGamepad->hasData() && boundGamepad->isGamepad()) {
+        last_updated_millis = now;
+        return get_state(boundGamepad);
     }
 
     // otherwise, recycle the existing control state
@@ -62,8 +56,6 @@ ctrl_state* ctrl_update(bool upd8) {
 
 // right now, this is only written and tested with an xbox bluetooth controller
 ctrl_state* get_state(ControllerPtr ctl) {
-    // todo - validate controller type
-    // todo - expand controller type support?
 
     // because we're processing a new update, we know the controller is alive
     new_ctrls->alive = true;
@@ -169,50 +161,36 @@ void ctrl_init() {
 }
 
 void on_connected_controller(ControllerPtr ctl) {
-    bool foundEmptySlot = false;
-    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
-        if (myControllers[i] == nullptr) {
-            Serial.printf("CALLBACK: Controller is connected, index=%d\n", i);
-            // Additionally, you can get certain gamepad properties like:
-            // Model, VID, PID, BTAddr, flags, etc.
-            ControllerProperties properties = ctl->getProperties();
-            Serial.printf("Controller model: %s, VID=0x%04x, PID=0x%04x\n", ctl->getModelName().c_str(), properties.vendor_id,
-                           properties.product_id);
-            myControllers[i] = ctl;
-            foundEmptySlot = true;
+    // Check if the connected gamepad's MAC matches the allowed MAC
+    bool isAllowed = true;
+    for (int i = 0; i < 6; i++) {
+        if (ctl->getProperties().btaddr[i] != allowedMAC[i]) {
+            isAllowed = false;
             break;
         }
     }
-    if (!foundEmptySlot) {
-        Serial.println("CALLBACK: Controller connected, but could not found empty slot");
+
+    if (isAllowed) {
+        Console.println("Xbox Controller Connected!");
+        boundGamepad = ctl;
+        connected = true;
+        // Anguirel says: There is an issue where scan_evt will timeout eventually causing something to print "FEX x y",
+        // (where x and y are various numbers) to the console and then eventually crash. Possible occurence of
+        // https://github.com/ricardoquesada/bluepad32/issues/43.  The reported workaround is to disable scanning
+        // for new controllers once a controller has connected.
+        BP32.enableNewBluetoothConnections(false);
+    } else {
+        Console.println("Unauthorized controller, disconnecting...");
+        ctl->disconnect();
     }
 
-    connected = true;
-
-    // Anguirel says: There is an issue where scan_evt will timeout eventually causing something to print "FEX x y",
-    // (where x and y are various numbers) to the console and then eventually crash. Possible occurence of
-    // https://github.com/ricardoquesada/bluepad32/issues/43.  The reported workaround is to disable scanning
-    // for new controllers once a controller has connected.
-    BP32.enableNewBluetoothConnections(false);
 }
 
 void on_disconnected_controller(ControllerPtr ctl) {
-    connected = false;
-
-    bool foundController = false;
-
-    for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
-        if (myControllers[i] == ctl) {
-            Serial.printf("CALLBACK: Controller disconnected from index=%d\n", i);
-            myControllers[i] = nullptr;
-            foundController = true;
-            break;
+        if (boundGamepad == ctl) {
+            Console.println("CALLBACK: Controller disconnected");
+            boundGamepad = nullptr;
+            BP32.enableNewBluetoothConnections(true);
+            connected = false;
         }
-    }
-
-    if (!foundController) {
-        Serial.println("CALLBACK: Controller disconnected, but not found in myControllers");
-    }
-
-    BP32.enableNewBluetoothConnections(true);
 }

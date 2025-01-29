@@ -30,8 +30,7 @@ PID throttle_pid(&pid_current_rpm, &pid_throttle_output, &pid_target_rpm, PID_KP
 
 // Arduino setup function. Runs in CPU 1
 void setup() {
-    Serial.begin(115200);
-    Serial.println("PotatoMelt startup");
+    Console.println("PotatoMelt startup");
 
     // set up I2C
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
@@ -154,7 +153,7 @@ void loop() {
     }
 
     if (millis() - last_logged_at > 500) {
-        Serial.printf("Controller: connected: %d alive: %d spin: %d vThrottle: %d | battery: %d | IMU correction %f \n", c->connected, c->alive, c->spin_requested, c->target_rpm, robot.get_battery(), robot.get_accel_trim(c->target_rpm));
+        Console.printf("Controller: connected: %d alive: %d spin: %d vThrottle: %d | battery: %d | IMU correction %f \n", c->connected, c->alive, c->spin_requested, c->target_rpm, robot.get_battery(), robot.get_accel_trim(c->target_rpm));
         last_logged_at = millis();
     }
 
