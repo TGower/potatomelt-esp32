@@ -11,7 +11,7 @@
 #define XBOX_MAC_ADDRESS {0x68, 0x6C, 0xE6, 0xA2, 0x05, 0x1F}
 
 // ------------ Spin control settings ----------------
-#define ACCELEROMETER_HARDWARE_RADIUS_CM 5.13f
+#define ACCELEROMETER_HARDWARE_RADIUS_CM 5.00f
 // Ant-tato distance: 3.415f
 // Beetle-tato distance: 5.13f
 #define LED_OFFSET_PERCENT 47
@@ -27,8 +27,8 @@
 #define CONTROL_SPIN_SPEED_DEADZONE 200
 #define CONTROL_THROTTLE_MINIMUM 500
 
-#define TANK_FORBACK_POWER_SCALE 0.02f // Scale the power waaaaay down on tank mode
-#define TANK_TURNING_POWER_SCALE 0.005f // because we're sitting on a pair of ungeared brushless motors
+#define TANK_FORBACK_POWER_SCALE 0.2f // Scale the power waaaaay down on tank mode
+#define TANK_TURNING_POWER_SCALE 0.05f // because we're sitting on a pair of ungeared brushless motors
 
 // ------------ PID tuning ---------------------------
 // Tuning PIDs is an art. See: https://pidexplained.com/how-to-tune-a-pid-controller/
@@ -38,9 +38,11 @@
 #define PID_KD 0.0                                  // Derivative - useful to prevent overshoot of target value.
 
 // ------------ RPM Targets ---------------------------
-#define CONTROL_TARGET_RPMS {600, 800, 1000, 1200, 1500, 1800, 2100, 2500, 3000};
-#define CONTROL_TRANSLATION_TRIMS {1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2, 10.0};
-#define NUM_TARGET_RPMS 9
+#define CONTROL_TARGET_RPMS {100, 200, 300, 600, 1200, 1800, 2100, 2500, 3000, 4000, 5000, 6000, 7000, 8000, 9000};
+#define CONTROL_TRANSLATION_TRIMS {1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2, 10.0, 13.3, 16.7, 20.0, 23.3, 26.7, 30.0};
+//#define CONTROL_TARGET_RPMS {600, 800, 1000, 1200, 1500, 1800, 2100, 2500, 3000};
+//#define CONTROL_TRANSLATION_TRIMS {1.0, 1.2, 1.5, 1.8, 2.2, 2.7, 3.3, 3.9, 4.7, 5.6, 6.8, 8.2, 10.0};
+#define NUM_TARGET_RPMS 15
 #define NUM_TRANS_TRIMS 13
 
 // ------------- controller button mappings ----------
@@ -70,7 +72,7 @@
 #define BATTERY_ALERT_ENABLED                     // if enabled - heading LED will flicker when battery voltage is low
 #define BATTERY_CRIT_HALT_ENABLED                 // if enabled - robot will halt when battery voltage is critically low
 #define BATTERY_VOLTAGE_DIVIDER 8.24              // From the PCB - what's the voltage divider betweeen the battery + and the sense line?
-#define BATTERY_CELL_COUNT 4                      // How many cells are in the battery?
+#define BATTERY_CELL_COUNT 6                      // How many cells are in the battery?
 // Beetle-tato count: 4
 #define BATTERY_CELL_FULL_VOLTAGE 4.2             // What voltage is a fully-charged cell? Standard lipos are 4.2v, other chemistries will vary
 #define BATTERY_CELL_EMPTY_VOLTAGE 3.2            // And on the other hand, what voltage is an empty cell? We're going to cut off at 3.2v/cell
